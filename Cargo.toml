@@ -10,7 +10,7 @@ mysql = "15.0.0"
 
 [[bin]]
 name = "server"
-path = "server.rs"
+path = "src/server.rs"
 [[bin]]
 name = "client"
-path = "client.rs"
+path = "src/client.rs"
