@@ -5,8 +5,9 @@ mod handler;
 
 fn main() {
     server::new(|| {
-        App::new().resource("/{name}/{id}/home.html", |r| r.with(handler::home::index::index))
-    }).bind("127.0.0.1:8080")
+        App::new()
+            .resource("/", |r| r.with(home::index::index))
+    }).bind("127.0.0.1:0080")
         .unwrap()
         .run();
 }
