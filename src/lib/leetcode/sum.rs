@@ -6,6 +6,7 @@
 
 use structopt::StructOpt;
 use std::num::ParseIntError;
+use std::collections::HashMap;
 
 type Foo<T> = Vec<T>;
 
@@ -33,7 +34,70 @@ struct Opts {
 pub fn test()
 {
     let args:Opts = Opts::from_args();
-    for (i, v) in args.numbers.iter().enumerate() {
-        println!("{:?}", v);
+    let (numbers, target) = (args.numbers, args.target);
+    let mut ret = Vec::new();
+
+    ret.push(brute_force(&numbers, target));
+    ret.push(two_pass_hash_table(&numbers, target));
+    ret.push(one_pass_hash_table(&numbers, target));
+    println!("{:?}", ret);
+}
+
+fn brute_force(numbers: &Foo<i32>, target: i32) -> Option<(usize, usize)>
+{
+    println!("brute force solution");
+    let len = numbers.len();
+    for i in 0..len {
+        for j in i+1..len {
+            if numbers[i]+numbers[j] ==  target {
+                return Some((i, j));
+            }
+        }
     }
+    None
+}
+
+/// 用hash table以空间换时间
+fn two_pass_hash_table(numbers: &Foo<i32>, target:i32) -> Option<(usize, usize)>
+{
+    println!("two-pass hash table solution");
+
+    let mut hash_map = HashMap::new();
+    let mut m;
+
+    for (k, v) in numbers.iter().enumerate() {
+        hash_map.insert(v, k);
+    }
+
+    for (k, v) in numbers.iter().enumerate() {
+        m = target - v;
+        // 确保在hash table里找到的key不等于自己
+//        if hash_map.contains_key(&m) && *hash_map.get(&m).unwrap()!=k {
+//            return Some((*hash_map.get(&m).unwrap(), k));
+//        }
+        while let Some( a) = hash_map.get(&m).cloned() {
+            if a!=k {
+                return Some((a, k));
+            }
+        }
+    }
+
+    None
+}
+
+
+fn one_pass_hash_table(numbers: &Foo<i32>, target: i32) -> Option<(usize, usize)>
+{
+    println!("one-pass hash table solution");
+    let mut hash_map = HashMap::new();
+    let mut m;
+    for (k, v) in numbers.iter().enumerate() {
+        m = target - v;
+        if hash_map.contains_key(&m) {
+            return Some((hash_map.get(&m).cloned()?, k));
+        }
+        hash_map.insert(v, k);
+    }
+
+    None
 }
