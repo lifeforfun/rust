@@ -1,7 +1,7 @@
 mod lib;
-use lib::leetcode::sum;
+use lib::leetcode::sum::test;
 
 fn main()
 {
-    sum::test();
+    test();
 }

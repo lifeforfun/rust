@@ -93,8 +93,8 @@ fn one_pass_hash_table(numbers: &Foo<i32>, target: i32) -> Option<(usize, usize)
     let mut m;
     for (k, v) in numbers.iter().enumerate() {
         m = target - v;
-        if hash_map.contains_key(&m) {
-            return Some((hash_map.get(&m).cloned()?, k));
+        while let Some(a) = hash_map.get(&m) {
+            return Some((*a, k));
         }
         hash_map.insert(v, k);
     }
