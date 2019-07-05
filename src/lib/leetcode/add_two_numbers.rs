@@ -13,13 +13,20 @@ use tokio::io::ErrorKind;
 
 type Foo<T> = Vec<T>;
 
-fn parse_numbers(s: &str) -> Result<Vec<u8>, ParseIntError>
+enum IntErrorKindLocal {
+    Base(IntErrorKind),
+    OutOfRange,
+}
+
+
+
+fn parse_numbers(s: &str) -> Result<Vec<u8>, ParseIntErrorLocal>
 {
     let mut v:Vec<u8> = vec![];
     for x in s.split(',').into_iter() {
         let n = u8::from_str(x).unwrap();
         if n<0 || n>9 {
-            return Err(ParseIntError{kind:IntErrorKind::Overflow});
+            return Err(ParseIntErrorLocal{kind: IntErrorKindLocal::OutOfRange});
         }
         v.push(n);
     }
