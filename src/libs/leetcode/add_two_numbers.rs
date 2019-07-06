@@ -5,28 +5,28 @@
 ///     输出：(7,0,8)
 ///     表示：342+465 = 807
 
-use std::num::ParseIntError;
-use std::num::IntErrorKind;
 use structopt::StructOpt;
 use std::str::FromStr;
-use tokio::io::ErrorKind;
+use failure::Error;
 
 type Foo<T> = Vec<T>;
 
-enum IntErrorKindLocal {
-    Base(IntErrorKind),
-    OutOfRange,
+#[derive(Debug, Fail)]
+enum ParseNumberError {
+    #[fail(display="number out of range: {}", name)]
+    OutOfRange{
+        name: String,
+    },
 }
 
 
-
-fn parse_numbers(s: &str) -> Result<Vec<u8>, ParseIntErrorLocal>
+fn parse_numbers(s: &str) -> Result<Vec<i8>, Error>
 {
-    let mut v:Vec<u8> = vec![];
+    let mut v:Vec<i8> = vec![];
     for x in s.split(',').into_iter() {
-        let n = u8::from_str(x).unwrap();
-        if n<0 || n>9 {
-            return Err(ParseIntErrorLocal{kind: IntErrorKindLocal::OutOfRange});
+        let n = i8::from_str(x).unwrap();
+        if n<i8::from(0) || n>i8::from(9) {
+            return Err(ParseNumberError::OutOfRange {name: format!("{}", n)}.into());
         }
         v.push(n);
     }
@@ -37,11 +37,11 @@ fn parse_numbers(s: &str) -> Result<Vec<u8>, ParseIntErrorLocal>
 #[structopt(name="add_two_numbers")]
 struct Opts {
     /// numbers like `1,2,3`
-    #[structopt(short="n1", long="number1", value_name="NUMBER LIST", required=true, parse(try_from_str="parse_numbers"))]
-    numbers1: Foo<u8>,
+    #[structopt(short="x", long="number1", value_name="NUMBER LIST", required=true, parse(try_from_str="parse_numbers"))]
+    numbers1: Foo<i8>,
     /// numbers like `1,2,3`
-    #[structopt(short="n2", long="number2", value_name="NUMBER LIST", required=true, parse(try_from_str="parse_numbers"))]
-    numbers2: Foo<u8>,
+    #[structopt(short="y", long="number2", value_name="NUMBER LIST", required=true, parse(try_from_str="parse_numbers"))]
+    numbers2: Foo<i8>,
 }
 
 
