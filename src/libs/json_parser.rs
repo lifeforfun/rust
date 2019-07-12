@@ -37,13 +37,13 @@ fn parse_number(&s: &str) -> Option(Value::Number(Number)) {
     Ok(Value::Number(Number::F64(90 as F64)))
 }
 
-fn parse_string(&s: &str) {
+fn parse_string(&s: &str) -> Option<String>{
 
 }
 
-fn parse_array() {}
+fn parse_array() -> Option<Vec<Value>> {}
 
-fn parse_object() {}
+fn parse_object() -> Option<HashMap<String, Value>> {}
 
 impl Value {
     fn parse(&s: &str) -> Self{
