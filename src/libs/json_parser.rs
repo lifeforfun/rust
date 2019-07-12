@@ -24,6 +24,16 @@ const TOKEN_ARRAY_CLOSE: &'static str = "]";
 const TOKEN_SINGLE_QUOTE: &'static str = "\'";
 const TOKEN_QUOTE: &'static str = "\"";
 
+
+/// 匹配name
+/// "name" or name
+fn parse_name(&s: &str) -> Option<Value::String> {
+
+
+
+    Ok(Value::String("name".to_string()))
+}
+
 fn parse_literal(&s: &str) -> Option(Value) {
     match &s {
         "null" => Ok(Value::Null),
@@ -44,6 +54,10 @@ fn parse_string(&s: &str) -> Option<String>{
 fn parse_array() -> Option<Vec<Value>> {}
 
 fn parse_object() -> Option<HashMap<String, Value>> {}
+
+fn ws_end() -> Option(){
+
+}
 
 impl Value {
     fn parse(&s: &str) -> Self{
