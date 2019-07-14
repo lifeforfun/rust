@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::str::Chars;
 
 type F64 = f64;
 type I64 = i64;
@@ -17,61 +18,95 @@ enum Value {
     Object(HashMap<String, Value>),
 }
 
-const TOKEN_OBJECT_START: &'static str = "{";
-const TOKEN_OBJECT_CLOSE: &'static str = "}";
-const TOKEN_ARRAY_START: &'static str = "[";
-const TOKEN_ARRAY_CLOSE: &'static str = "]";
-const TOKEN_SINGLE_QUOTE: &'static str = "\'";
-const TOKEN_QUOTE: &'static str = "\"";
-
-
-/// 匹配name
-/// "name" or name
-fn parse_name(&s: &str) -> Option<Value::String> {
-
-
-
-    Ok(Value::String("name".to_string()))
+#[derive(Debug)]
+struct ParserIter<'a> {
+    cursor: Option<char>,
+    s: &'a mut Chars<'a>,
 }
 
-fn parse_literal(&s: &str) -> Option(Value) {
-    match &s {
-        "null" => Ok(Value::Null),
-        "false" => Ok(Value::Bool(false)),
-        "true" => Ok(Value::Bool(true)),
-        _ => None,
+impl<'a> ParserIter<'a> {
+    fn new(code: &'a mut Chars<'a>) -> ParserIter<'a> {
+        ParserIter {
+            cursor: code.next(),
+            s: code,
+        }
+    }
+
+    fn get_str(&mut self, len: usize) -> Vec<char>{
+        let mut i = 1;
+        let mut vc     = vec![];
+        loop {
+            if len<i {
+                break;
+            }
+            if let Some(c) = self.cursor {
+                vc.push(c);
+            } else {
+                return vc;
+            }
+            self.next();
+            i += 1;
+        }
+        vc
+    }
+
+    fn trim_whitespaces(&mut self) {
+        while let Some(c) = self.cursor {
+            match c {
+                '\n' | '\r' | '\t' | ' ' => self.next(),
+                _ => return,
+            };
+        }
+    }
+
+    fn parse_literal(&mut self) -> Option<Result<Value, String>>{
+        if let Some(c) = self.cursor {
+            match c {
+                't' => {
+                    let s = self.get_str(4).into_iter().collect::<String>();
+                    if s=="true" {
+                        return Some(Ok(Value::Bool(true)));
+                    }
+                    return Some(Err(format!("parse bool error: expect 'true' found {:?}", s)));
+                },
+                'f' => {
+                    let s = self.get_str(5).into_iter().collect::<String>();
+                    if s=="false" {
+                        return Some(Ok(Value::Bool(false)));
+                    }
+                    return Some(Err(format!("parse bool error: expect 'false' found {:?}", s)));
+                },
+                'n' => {
+                    let s = self.get_str(4).into_iter().collect::<String>();
+                    if s=="null" {
+                        return Some(Ok(Value::Null));
+                    }
+                    return Some(Err(format!("parse error: expect 'null' found {}", s)));
+                },
+                _ => return None,
+            }
+        }
+        None
     }
 }
 
-fn parse_number(&s: &str) -> Option(Value::Number(Number)) {
-    Ok(Value::Number(Number::F64(90 as F64)))
-}
-
-fn parse_string(&s: &str) -> Option<String>{
-
-}
-
-fn parse_array() -> Option<Vec<Value>> {}
-
-fn parse_object() -> Option<HashMap<String, Value>> {}
-
-fn ws_end() -> Option(){
-
-}
-
-impl Value {
-    fn parse(&s: &str) -> Self{
-        let object = Value::Object(HashMap::<String, Value>::new());
-        for i in s.to_string().into_bytes().iter() {
-
-        }
-        object
+impl <'a>Iterator for ParserIter<'a> {
+    type Item = char;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.cursor = self.s.next();
+        self.cursor
     }
 }
 
 pub fn test()
 {
     let data = r#"
-        {}
-    "#;
+        {中国}
+    "#.to_string();
+    {
+        let mut chars = data.chars();
+        let mut pit = ParserIter::new(&mut chars);
+        pit.trim_whitespaces();
+
+    }
 }
