@@ -4,11 +4,13 @@ use std::str::Chars;
 type F64 = f64;
 type I64 = i64;
 
+#[derive(Debug)]
 enum Number {
     I64(I64),
     F64(F64),
 }
 
+#[derive(Debug)]
 enum Value {
     Null,
     Bool(bool),
@@ -101,12 +103,12 @@ impl <'a>Iterator for ParserIter<'a> {
 pub fn test()
 {
     let data = r#"
-        {中国}
+        null
     "#.to_string();
     {
         let mut chars = data.chars();
         let mut pit = ParserIter::new(&mut chars);
         pit.trim_whitespaces();
-
+        println!("{:?}", pit.parse_literal());
     }
 }
