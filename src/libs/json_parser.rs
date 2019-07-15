@@ -90,6 +90,18 @@ impl<'a> ParserIter<'a> {
         }
         None
     }
+
+    fn parse_number(&mut self) -> Option<Result<Value::Number, String>>{
+        let mut nv = vec![];
+        let mut is_float = false;
+        while let Some(c) = self.cursor {
+            match c {
+                _ => break,
+            }
+        }
+        None
+    }
+
 }
 
 impl <'a>Iterator for ParserIter<'a> {
