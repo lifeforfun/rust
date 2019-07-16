@@ -96,7 +96,7 @@ impl<'a> ParserIter<'a> {
         let mut nv = vec![];
         while let Some(c) = self.cursor {
             match c {
-                '0'..='9'|'+'|'-'|'e'|'E' => {
+                '0'..='9'|'+'|'-'|'e'|'E'|'.' => {
                     nv.push(c);
                     self.next();
                 },
@@ -136,12 +136,12 @@ impl <'a>Iterator for ParserIter<'a> {
 pub fn test()
 {
     let data = r#"
-        null
+        -1.e-9
     "#.to_string();
     {
         let mut chars = data.chars();
         let mut pit = ParserIter::new(&mut chars);
         pit.trim_whitespaces();
-        println!("{:?}", pit.parse_literal());
+        println!("{:?}", pit.parse_number());
     }
 }
