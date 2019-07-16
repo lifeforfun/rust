@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::str::Chars;
+use std::str::FromStr;
 
 type F64 = f64;
 type I64 = i64;
@@ -91,15 +92,35 @@ impl<'a> ParserIter<'a> {
         None
     }
 
-    fn parse_number(&mut self) -> Option<Result<Value::Number, String>>{
+    fn parse_number(&mut self) -> Option<Result<Value, String>>{
         let mut nv = vec![];
-        let mut is_float = false;
         while let Some(c) = self.cursor {
             match c {
+                '0'..='9'|'+'|'-'|'e'|'E' => {
+                    nv.push(c);
+                    self.next();
+                },
                 _ => break,
             }
         }
-        None
+        if nv.len()==0 {
+            return None;
+        }
+        let nstring = nv.into_iter().collect::<String>();
+        let nstr = &nstring[..];
+        if let Some(_) = nstr.find('.') {
+            Some(F64::from_str(nstr).map_err(|e| -> String {
+                format!("parse f64 error: {}", e)
+            }).map(|v| -> Value {
+                Value::Number(Number::F64(v))
+            }))
+        } else {
+            Some(I64::from_str(nstr).map_err(|e| -> String {
+                format!("parse i64 error: {}", e)
+            }).map(|v| -> Value {
+                Value::Number(Number::I64(v))
+            }))
+        }
     }
 
 }
