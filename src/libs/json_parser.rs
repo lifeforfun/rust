@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::str::Chars;
 use std::str::FromStr;
+use std::convert::TryFrom;
 
 type F64 = f64;
 type I64 = i64;
@@ -126,10 +127,60 @@ impl<'a> ParserIter<'a> {
     fn parse_string(&mut self) -> Option<Result<Value, String>> {
         let mut name_start = false;
         let mut nv = vec![];
+        self.trim_whitespaces();
+        let c = self.cursor.unwrap();
+        if c!='"' {
+            return Some(Err(format!("unexpect character {}, expect '\"'", c)));
+        }
         while let Some(c) = self.cursor {
             match c {
+                '\\' => {
+                    let next = self.next().unwrap();
+                    match next {
+                        '"' => {
+                            nv.push('"');
+                        },
+                        '\\' => {
+                            nv.push('\\');
+                        },
+                        '/' => {
+                            nv.push('/');
+                        },
+                        'b' => {
+                            nv.push('\x08');
+                        },
+                        'f' => {
+                            nv.push('\x0C');
+                        },
+                        'n' => {
+                            nv.push('\n');
+                        },
+                        'r' => {
+                            nv.push('\r');
+                        },
+                        't' => {
+                            nv.push('\t');
+                        },
+                        'u' => {
+                            let s = self.get_str(4).into_iter().collect::<String>();
+                            if let Ok(i) = u32::from_str_radix(&s[..], 16) {
+                                if let Ok(ic)  = char::try_from(i) {
+                                    nv.push(ic);
+                                }
+                            } else {
+                                return Some(Err(format!("escape unicode characters error : {}", s)));
+                            }
+                        },
+                        oc => {
+                            return Some(Err(format!("unexpected escaped character {}", next)));
+                        },
+                    };
+                    self.next();
+                },
                 '"' => {
                     if name_start {
+                        self.next();
+                        self.trim_whitespaces();
                         return Some(Ok(Value::String(nv.into_iter().collect::<String>())));
                     }
                     name_start = true;
@@ -143,9 +194,22 @@ impl<'a> ParserIter<'a> {
         None
     }
 
-    fn parse_array(&mut self) {
-
-    }
+//    fn parse_array(&mut self) {
+//        let mut arr_start = false;
+//        let mut nv = vec![];
+//        while let Some(c) = self.cursor {
+//            match c {
+//                '[' => {
+//
+//                },
+//                ']' => {},
+//                ',' => {},
+//                other => {
+//
+//                },
+//            }
+//        }
+//    }
 
 }
 
@@ -160,12 +224,17 @@ impl <'a>Iterator for ParserIter<'a> {
 pub fn test()
 {
     let data = r#"
-        "test中国"
+        "test中国\nfdsfs"
     "#.to_string();
     {
         let mut chars = data.chars();
         let mut pit = ParserIter::new(&mut chars);
         pit.trim_whitespaces();
-        println!("{:?}", pit.parse_string());
+        match pit.parse_string().unwrap().unwrap() {
+            Value::String(s) => {
+                println!("{}", s);
+            },
+            _ => {},
+        }
     }
 }
