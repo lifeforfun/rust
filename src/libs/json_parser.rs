@@ -123,6 +123,30 @@ impl<'a> ParserIter<'a> {
         }
     }
 
+    fn parse_string(&mut self) -> Option<Result<Value, String>> {
+        let mut name_start = false;
+        let mut nv = vec![];
+        while let Some(c) = self.cursor {
+            match c {
+                '"' => {
+                    if name_start {
+                        return Some(Ok(Value::String(nv.into_iter().collect::<String>())));
+                    }
+                    name_start = true;
+                },
+                other => {
+                    nv.push(other);
+                },
+            };
+            self.next();
+        }
+        None
+    }
+
+    fn parse_array(&mut self) {
+
+    }
+
 }
 
 impl <'a>Iterator for ParserIter<'a> {
@@ -136,12 +160,12 @@ impl <'a>Iterator for ParserIter<'a> {
 pub fn test()
 {
     let data = r#"
-        -1.e-9
+        "test中国"
     "#.to_string();
     {
         let mut chars = data.chars();
         let mut pit = ParserIter::new(&mut chars);
         pit.trim_whitespaces();
-        println!("{:?}", pit.parse_number());
+        println!("{:?}", pit.parse_string());
     }
 }
