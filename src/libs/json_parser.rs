@@ -64,36 +64,45 @@ impl<'a> ParserIter<'a> {
     }
 
     fn parse_literal(&mut self) -> Option<Result<Value, String>>{
+
+        let mut literal = None;
+
         if let Some(c) = self.cursor {
             match c {
                 't' => {
                     let s = self.get_str(4).into_iter().collect::<String>();
                     if s=="true" {
-                        return Some(Ok(Value::Bool(true)));
+                        literal = Some(Ok(Value::Bool(true)));
+                    } else {
+                        return Some(Err(format!("parse bool error: expect 'true' found {:?}", s)));
                     }
-                    return Some(Err(format!("parse bool error: expect 'true' found {:?}", s)));
                 },
                 'f' => {
                     let s = self.get_str(5).into_iter().collect::<String>();
                     if s=="false" {
-                        return Some(Ok(Value::Bool(false)));
+                        literal = Some(Ok(Value::Bool(false)));
+                    } else {
+                        return Some(Err(format!("parse bool error: expect 'false' found {:?}", s)));
                     }
-                    return Some(Err(format!("parse bool error: expect 'false' found {:?}", s)));
                 },
                 'n' => {
                     let s = self.get_str(4).into_iter().collect::<String>();
                     if s=="null" {
-                        return Some(Ok(Value::Null));
+                        literal = Some(Ok(Value::Null));
+                    } else {
+                        return Some(Err(format!("parse error: expect 'null' found {}", s)));
                     }
-                    return Some(Err(format!("parse error: expect 'null' found {}", s)));
                 },
-                _ => return None,
+                _ => {},
             }
         }
-        None
+        // 确保返回之前向后移动游标
+        self.next();
+        literal
     }
 
     fn parse_number(&mut self) -> Option<Result<Value, String>>{
+
         let mut nv = vec![];
         while let Some(c) = self.cursor {
             match c {
@@ -107,6 +116,8 @@ impl<'a> ParserIter<'a> {
         if nv.len()==0 {
             return None;
         }
+        // 确保返回之前向后移动游标
+        self.next();
         let nstring = nv.into_iter().collect::<String>();
         let nstr = &nstring[..];
         if let Some(_) = nstr.find('.') {
@@ -125,9 +136,9 @@ impl<'a> ParserIter<'a> {
     }
 
     fn parse_string(&mut self) -> Option<Result<Value, String>> {
+
         let mut name_start = false;
         let mut nv = vec![];
-        self.trim_whitespaces();
         let c = self.cursor.unwrap();
         if c!='"' {
             return Some(Err(format!("unexpect character {}, expect '\"'", c)));
@@ -171,7 +182,7 @@ impl<'a> ParserIter<'a> {
                                 return Some(Err(format!("escape unicode characters error : {}", s)));
                             }
                         },
-                        oc => {
+                        _ => {
                             return Some(Err(format!("unexpected escaped character {}", next)));
                         },
                     };
@@ -179,8 +190,8 @@ impl<'a> ParserIter<'a> {
                 },
                 '"' => {
                     if name_start {
+                        // 确保返回之前向后移动游标
                         self.next();
-                        self.trim_whitespaces();
                         return Some(Ok(Value::String(nv.into_iter().collect::<String>())));
                     }
                     name_start = true;
@@ -194,22 +205,48 @@ impl<'a> ParserIter<'a> {
         None
     }
 
-//    fn parse_array(&mut self) {
-//        let mut arr_start = false;
-//        let mut nv = vec![];
-//        while let Some(c) = self.cursor {
-//            match c {
-//                '[' => {
-//
-//                },
-//                ']' => {},
-//                ',' => {},
-//                other => {
-//
-//                },
-//            }
-//        }
-//    }
+    fn parse_array(&mut self) -> Option<Result<Vec<Value>, String>>{
+        let mut arr_start = false;
+        let mut nv: Vec<Value> = vec![];
+        while let Some(c) = self.cursor {
+            match c {
+                ']' => {
+                    if !arr_start {
+                        return Some(Err(format!("parse array error")));
+                    }
+                    // 确保返回之前向后移动游标
+                    self.next();
+                    return Some(Ok(nv));
+                },
+                ',' | '[' => {
+                    if c == '[' {
+                        arr_start = true;
+                    } else {
+                        if !arr_start {
+                            return Some(Err(format!("parse array error")));
+                        }
+                    }
+                    self.next();
+                    self.trim_whitespaces();
+                    if let Some(Ok(v)) = self.parse_literal() {
+                        nv.push(v);
+                    } else if let Some(Ok(v)) = self.parse_number() {
+                        nv.push(v);
+                    } else if let Some(Ok(v)) = self.parse_string() {
+                        nv.push(v);
+                    } else {
+                        // TODO match object
+                        return Some(Err(format!("parse array error: {}", self.cursor.unwrap())));
+                    }
+                },
+                other => {
+                    return Some(Err(format!("unexpected character '{}'", other)));
+                },
+            }
+            self.trim_whitespaces();
+        }
+        None
+    }
 
 }
 
@@ -224,17 +261,15 @@ impl <'a>Iterator for ParserIter<'a> {
 pub fn test()
 {
     let data = r#"
-        "test中国\nfdsfs"
+        [
+        "test中国\nfdsfs",
+        "test"
+        ]
     "#.to_string();
     {
         let mut chars = data.chars();
         let mut pit = ParserIter::new(&mut chars);
         pit.trim_whitespaces();
-        match pit.parse_string().unwrap().unwrap() {
-            Value::String(s) => {
-                println!("{}", s);
-            },
-            _ => {},
-        }
+        println!("{:?}", pit.parse_array());
     }
 }
