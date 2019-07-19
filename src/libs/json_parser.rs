@@ -36,6 +36,23 @@ impl<'a> ParserIter<'a> {
         }
     }
 
+    fn parse(&mut self) -> Result<Value, String> {
+        self.trim_whitespaces();
+        if let Some(Ok(v)) = self.parse_literal() {
+            Ok(v)
+        } else if let Some(Ok(v)) = self.parse_string() {
+            Ok(v)
+        } else if let Some(Ok(v)) = self.parse_number() {
+            Ok(v)
+        } else if let Some(Ok(v)) = self.parse_array() {
+            Ok(v)
+        } else if let Some(Ok(v)) = self.parse_object() {
+            Ok(v)
+        } else {
+            Err(format!("parse json error"))
+        }
+    }
+
     fn get_str(&mut self, len: usize) -> Vec<char> {
         let mut i = 1;
         let mut vc = vec![];
@@ -370,7 +387,6 @@ pub fn test() {
     {
         let mut chars = data.chars();
         let mut pit = ParserIter::new(&mut chars);
-        pit.trim_whitespaces();
-        println!("{:?}", pit.parse_object());
+        println!("{:?}", pit.parse());
     }
 }
