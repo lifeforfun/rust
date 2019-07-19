@@ -36,6 +36,19 @@ impl<'a> ParserIter<'a> {
         }
     }
 
+    fn next_char(&mut self, trim_whitespace: bool) -> Option<char> {
+        self.cursor = self.s.next();
+        if trim_whitespace {
+            while let Some(c) = self.cursor {
+                match c {
+                    '\n' | '\r' | '\t' | ' ' => self.cursor = self.s.next(),
+                    _ => break,
+                };
+            }
+        }
+        self.cursor
+    }
+
     fn parse(&mut self) -> Result<Value, String> {
         self.trim_whitespaces();
         if let Some(Ok(v)) = self.parse_literal() {
@@ -53,20 +66,19 @@ impl<'a> ParserIter<'a> {
         }
     }
 
+    /// 返回之后指针指向最后一个字符
     fn get_str(&mut self, len: usize) -> Vec<char> {
-        let mut i = 1;
         let mut vc = vec![];
         loop {
-            if len < i {
-                break;
-            }
             if let Some(c) = self.cursor {
                 vc.push(c);
             } else {
-                return vc;
+                break;
             }
-            self.next();
-            i += 1;
+            if len==vc.len() {
+                break;
+            }
+            self.next_char(false);
         }
         vc
     }
@@ -74,8 +86,8 @@ impl<'a> ParserIter<'a> {
     fn trim_whitespaces(&mut self) {
         while let Some(c) = self.cursor {
             match c {
-                '\n' | '\r' | '\t' | ' ' => self.next(),
-                _ => return,
+                '\n' | '\r' | '\t' | ' ' => self.next_char(true),
+                _ => break,
             };
         }
     }
@@ -115,12 +127,12 @@ impl<'a> ParserIter<'a> {
                         return Some(Err(format!("parse error: expect 'null' found {}", s)));
                     }
                 }
-                _ => {}
+                _ => {},
             }
         }
         if let Some(_) = literal {
-            // 确保返回之前向后移动游标,没匹配到有效字符不要移动
-            self.next();
+            // 确保跳出后指向下一个字符
+            self.next_char(true);
         }
         literal
     }
@@ -131,7 +143,7 @@ impl<'a> ParserIter<'a> {
             match c {
                 '0'..='9' | '+' | '-' | 'e' | 'E' | '.' => {
                     nv.push(c);
-                    self.next();
+                    self.next_char(false);
                 }
                 _ => break,
             }
@@ -139,8 +151,8 @@ impl<'a> ParserIter<'a> {
         if nv.len() == 0 {
             return None;
         }
-        // 确保返回之前向后移动游标
-        self.next();
+        // 确保跳出后指向下一个字符
+        self.next_char(true);
         let nstring = nv.into_iter().collect::<String>();
         let nstr = &nstring[..];
         if let Some(_) = nstr.find('.') {
@@ -168,7 +180,7 @@ impl<'a> ParserIter<'a> {
         while let Some(c) = self.cursor {
             match c {
                 '\\' => {
-                    let next = self.next()?;
+                    let next = self.next_char(false)?;
                     match next {
                         '"' => {
                             nv.push('"');
@@ -195,7 +207,7 @@ impl<'a> ParserIter<'a> {
                             nv.push('\t');
                         }
                         'u' => {
-                            self.next();
+                            self.next_char(false);
                             let s = self.get_str(4).into_iter().collect::<String>();
                             if let Ok(i) = u32::from_str_radix(&s[..], 16) {
                                 if let Ok(ic) = char::try_from(i) {
@@ -215,8 +227,8 @@ impl<'a> ParserIter<'a> {
                 }
                 '"' => {
                     if name_start {
-                        // 确保返回之前向后移动游标
-                        self.next();
+                        // 确保跳出后指向下一个字符
+                        self.next_char(true);
                         return Some(Ok(Value::String(nv.into_iter().collect::<String>())));
                     }
                     name_start = true;
@@ -228,12 +240,16 @@ impl<'a> ParserIter<'a> {
                     nv.push(other);
                 }
             };
-            self.next();
+            self.next_char(false);
         }
         None
     }
 
     fn parse_array(&mut self) -> Option<Result<Value, String>> {
+        let c = self.cursor?;
+        if c!='[' {
+            return Some(Err(format!("unexpected array start, expect [ but found {}", c)))
+        }
         let mut arr_start = false;
         let mut nv = vec![];
         while let Some(c) = self.cursor {
@@ -242,8 +258,8 @@ impl<'a> ParserIter<'a> {
                     if !arr_start {
                         return Some(Err(format!("parse array error")));
                     }
-                    // 确保返回之前向后移动游标
-                    self.next();
+                    // 确保跳出后指向下一个字符
+                    self.next_char(true);
                     return Some(Ok(Value::Array(nv)));
                 }
                 ',' | '[' => {
@@ -254,8 +270,7 @@ impl<'a> ParserIter<'a> {
                             return Some(Err(format!("parse array error")));
                         }
                     }
-                    self.next();
-                    self.trim_whitespaces();
+                    self.next_char(true);
                     if let Some(Ok(v)) = self.parse_array() {
                         nv.push(v);
                     } else if let Some(Ok(v)) = self.parse_literal() {
@@ -297,15 +312,13 @@ impl<'a> ParserIter<'a> {
             match c {
                 '{' => {
                     ob_start = true;
-                    self.next();
-                    self.trim_whitespaces();
+                    self.next_char(true);
                     if let Some(Ok(Value::String(name))) = self.parse_string() {
                         let colon = self.cursor?;
                         if colon != ':' {
                             return Some(Err(format!("expect colon but found {}", colon)));
                         }
-                        self.next();
-                        self.trim_whitespaces();
+                        self.next_char(true);
                         if let Some(Ok(v)) = self.parse_object() {
                             obj.insert(name, v);
                         } else if let Some(Ok(v)) = self.parse_array() {
@@ -326,21 +339,20 @@ impl<'a> ParserIter<'a> {
                 }
                 '}' => {
                     if !ob_start {
-                        return Some(Err(format!("unexpected object close brach")));
+                        return Some(Err(format!("unexpected object close brace")));
                     }
-                    self.next();
+                    // 确保跳出后指向下一个字符
+                    self.next_char(true);
                     return Some(Ok(Value::Object(obj)));
                 }
                 ',' => {
-                    self.next();
-                    self.trim_whitespaces();
+                    self.next_char(true);
                     if let Some(Ok(Value::String(name))) = self.parse_string() {
                         let colon = self.cursor?;
                         if colon != ':' {
                             return Some(Err(format!("expect colon but found {}", colon)));
                         }
-                        self.next();
-                        self.trim_whitespaces();
+                        self.next_char(true);
                         if let Some(Ok(v)) = self.parse_object() {
                             obj.insert(name, v);
                         } else if let Some(Ok(v)) = self.parse_array() {
@@ -361,24 +373,23 @@ impl<'a> ParserIter<'a> {
                 }
                 c => return Some(Err(format!("unexpected character {}", c))),
             }
-            self.next();
             self.trim_whitespaces();
         }
         None
     }
 }
 
-impl<'a> Iterator for ParserIter<'a> {
-    type Item = char;
-    fn next(&mut self) -> Option<Self::Item> {
-        self.cursor = self.s.next();
-        self.cursor
-    }
-}
 
 pub fn test() {
     let data = r#"
-        "\u4e05"
+        {
+          "\u4e05" : [
+            "test中国\n\u4e06",
+            100,
+            false
+          ],
+          "测试" : 100
+        }
     "#
     .to_string();
     {
