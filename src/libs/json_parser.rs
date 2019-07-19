@@ -195,6 +195,7 @@ impl<'a> ParserIter<'a> {
                             nv.push('\t');
                         }
                         'u' => {
+                            self.next();
                             let s = self.get_str(4).into_iter().collect::<String>();
                             if let Ok(i) = u32::from_str_radix(&s[..], 16) {
                                 if let Ok(ic) = char::try_from(i) {
@@ -211,7 +212,6 @@ impl<'a> ParserIter<'a> {
                             return Some(Err(format!("unexpected escaped character {}", next)));
                         }
                     };
-                    self.next();
                 }
                 '"' => {
                     if name_start {
@@ -222,6 +222,9 @@ impl<'a> ParserIter<'a> {
                     name_start = true;
                 }
                 other => {
+                    if !name_start {
+                        return Some(Err(format!("parse string error , string start not found")))
+                    }
                     nv.push(other);
                 }
             };
@@ -375,13 +378,7 @@ impl<'a> Iterator for ParserIter<'a> {
 
 pub fn test() {
     let data = r#"
-        {
-        "test": [
-        "test中国\nfdsfs",
-        "方法",
-        100
-        ]
-        }
+        "\u4e05"
     "#
     .to_string();
     {
