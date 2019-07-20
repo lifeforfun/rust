@@ -1,12 +1,11 @@
+use futures::lazy;
+use log::info;
+use std::time::{Duration, Instant};
 use tokio::prelude::*;
 use tokio::timer::Delay;
-use log::{info};
-use std::time::{Duration, Instant};
-use futures::lazy;
 
-pub fn test()
-{
-    tokio::run(lazy(||{
+pub fn test() {
+    tokio::run(lazy(|| {
         for i in 0..10 {
             let future_task = Delay::new(Instant::now() + Duration::from_secs(1))
                 .and_then(move |t| {
@@ -14,8 +13,9 @@ pub fn test()
                     info!("task run: {}", i);
                     Ok(())
                 })
-                .map_err(|e|{ println!("error occur: {:?}", e); })
-            ;
+                .map_err(|e| {
+                    println!("error occur: {:?}", e);
+                });
             tokio::spawn(future_task);
         }
         // closure must return Result to support `IntoFuture`

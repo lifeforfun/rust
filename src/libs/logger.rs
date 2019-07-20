@@ -1,14 +1,12 @@
 extern crate log;
 
-use log::{Record, Level, Metadata, LevelFilter};
+use log::{Level, LevelFilter, Metadata, Record};
 
 struct SimpleLogger;
 
-
 impl log::Log for SimpleLogger {
-
     fn enabled(&self, metadata: &Metadata) -> bool {
-        metadata.level()<=Level::Info
+        metadata.level() <= Level::Info
     }
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
@@ -18,8 +16,7 @@ impl log::Log for SimpleLogger {
     fn flush(&self) {}
 }
 
-pub fn init()
-{
+pub fn init() {
     log::set_logger(&SimpleLogger).unwrap();
     log::set_max_level(LevelFilter::Trace);
 }

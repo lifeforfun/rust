@@ -75,7 +75,7 @@ impl<'a> ParserIter<'a> {
             } else {
                 break;
             }
-            if len==vc.len() {
+            if len == vc.len() {
                 break;
             }
             self.next_char(false);
@@ -127,7 +127,7 @@ impl<'a> ParserIter<'a> {
                         return Some(Err(format!("parse error: expect 'null' found {}", s)));
                     }
                 }
-                _ => {},
+                _ => {}
             }
         }
         if let Some(_) = literal {
@@ -151,8 +151,8 @@ impl<'a> ParserIter<'a> {
         if nv.len() == 0 {
             return None;
         }
-        // 确保跳出后指向下一个字符
-        self.next_char(true);
+        // 匹配数字结束后已经指向下一个字符，所以只去除空白符即可
+        self.trim_whitespaces();
         let nstring = nv.into_iter().collect::<String>();
         let nstr = &nstring[..];
         if let Some(_) = nstr.find('.') {
@@ -235,7 +235,7 @@ impl<'a> ParserIter<'a> {
                 }
                 other => {
                     if !name_start {
-                        return Some(Err(format!("parse string error , string start not found")))
+                        return Some(Err(format!("parse string error , string start not found")));
                     }
                     nv.push(other);
                 }
@@ -247,8 +247,11 @@ impl<'a> ParserIter<'a> {
 
     fn parse_array(&mut self) -> Option<Result<Value, String>> {
         let c = self.cursor?;
-        if c!='[' {
-            return Some(Err(format!("unexpected array start, expect [ but found {}", c)))
+        if c != '[' {
+            return Some(Err(format!(
+                "unexpected array start, expect [ but found {}",
+                c
+            )));
         }
         let mut arr_start = false;
         let mut nv = vec![];
@@ -379,7 +382,6 @@ impl<'a> ParserIter<'a> {
     }
 }
 
-
 pub fn test() {
     let data = r#"
         {
@@ -388,7 +390,7 @@ pub fn test() {
             100,
             false
           ],
-          "测试" : 100
+          "测试" : 100,
         }
     "#
     .to_string();

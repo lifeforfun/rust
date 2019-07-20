@@ -2,7 +2,7 @@
 pub enum RoughTime {
     InThePast(TimeUnit, u32),
     JustNow,
-    InTheFuture(TimeUnit, u32)
+    InTheFuture(TimeUnit, u32),
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -12,18 +12,18 @@ pub enum TimeUnit {
     Hours,
     Days,
     Months,
-    Years
+    Years,
 }
 
 #[derive(Debug)]
 pub enum Shape {
-    Sphere {center: i32, radius: i32}
+    Sphere { center: i32, radius: i32 },
 }
 
 #[derive(Debug)]
-pub struct DifferentialEquation{}
+pub struct DifferentialEquation {}
 #[derive(Debug)]
-pub struct EarlyModernisPoem{}
+pub struct EarlyModernisPoem {}
 
 #[derive(Debug)]
 pub enum RelationshipStatus {
@@ -32,8 +32,8 @@ pub enum RelationshipStatus {
     ItsComplicated(Option<String>),
     ItsExtremelyComplicated {
         car: DifferentialEquation,
-        cdr: EarlyModernisPoem
-    }
+        cdr: EarlyModernisPoem,
+    },
 }
 
 use std::collections::HashMap;
@@ -43,7 +43,7 @@ pub enum Json {
     Number(f64),
     String(String),
     Array(Vec<Json>),
-    Object(Box<HashMap<String, Json>>)
+    Object(Box<HashMap<String, Json>>),
 }
 
 impl TimeUnit {
@@ -54,14 +54,13 @@ impl TimeUnit {
             TimeUnit::Hours => "hours",
             TimeUnit::Days => "days",
             TimeUnit::Months => "months",
-            TimeUnit::Years => "years"
+            TimeUnit::Years => "years",
         }
     }
 
     pub fn singular(self) -> &'static str {
         self.plural().trim_end_matches('s')
     }
-
 }
 
 impl RoughTime {
@@ -73,7 +72,10 @@ impl RoughTime {
 
 impl Shape {
     pub fn test() {
-        let unit_sphere = Shape::Sphere {center: 1, radius: 1};
+        let unit_sphere = Shape::Sphere {
+            center: 1,
+            radius: 1,
+        };
         println!("{:?}", unit_sphere);
     }
 }
@@ -88,13 +90,9 @@ impl RelationshipStatus {
 pub fn test() {
     let rt = RoughTime::InTheFuture(TimeUnit::Years, 100);
     let mat = match rt {
-        RoughTime::InThePast(units, count) =>
-            format!("{} {} ago", count, units.plural()),
-        RoughTime::JustNow =>
-            format!("just now"),
-        RoughTime::InTheFuture(units, count) =>
-            format!("{} {} from now", count, units.plural())
+        RoughTime::InThePast(units, count) => format!("{} {} ago", count, units.plural()),
+        RoughTime::JustNow => format!("just now"),
+        RoughTime::InTheFuture(units, count) => format!("{} {} from now", count, units.plural()),
     };
     println!("{}", mat);
-
 }

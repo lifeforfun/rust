@@ -1,9 +1,9 @@
-#[macro_use] extern crate failure;
+#[macro_use]
+extern crate failure;
 
 mod libs;
 use libs::json_parser::test;
 
-fn main()
-{
+fn main() {
     test();
 }

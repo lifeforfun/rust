@@ -1,13 +1,15 @@
 #[derive(Debug)]
 pub struct Queue<T> {
     older: Vec<T>,
-    younger: Vec<T>
+    younger: Vec<T>,
 }
 
 impl<T> Queue<T> {
-
     pub fn new() -> Queue<T> {
-        Queue{older: vec![], younger:vec![]}
+        Queue {
+            older: vec![],
+            younger: vec![],
+        }
     }
 
     pub fn push(&mut self, c: T) {

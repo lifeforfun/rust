@@ -1,4 +1,1 @@
-
-pub fn test()
-{
-}
+pub fn test() {}

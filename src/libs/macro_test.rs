@@ -11,7 +11,6 @@ macro_rules! t {
     }
 }
 
-pub fn test()
-{
-    println!("{:?}", t![1,2,3]);
+pub fn test() {
+    println!("{:?}", t![1, 2, 3]);
 }

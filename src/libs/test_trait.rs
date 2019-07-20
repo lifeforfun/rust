@@ -1,10 +1,10 @@
-trait Sth{
+trait Sth {
     fn foo(&self) -> &Self;
 }
 
 #[derive(Debug)]
 struct StructSth {
-    element: u8
+    element: u8,
 }
 
 impl Sth for StructSth {
@@ -14,6 +14,6 @@ impl Sth for StructSth {
 }
 
 pub fn test() {
-    let sth = &StructSth{element:1};
+    let sth = &StructSth { element: 1 };
     println!("{:?}", sth.foo())
 }
