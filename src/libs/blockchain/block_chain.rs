@@ -4,7 +4,7 @@ use crypto::digest::Digest;
 use crypto::sha3::Sha3;
 use std::time::SystemTime;
 
-struct Block {
+pub struct Block {
     timestamp: u32,
     data: Vec<u8>,
     prev_block_hash: Vec<u8>,
@@ -39,7 +39,7 @@ impl Block {
     }
 }
 
-struct Blockchain {
+pub struct Blockchain {
     blocks: Vec<Block>,
 }
 
@@ -58,7 +58,7 @@ impl Blockchain {
     }
 }
 
-fn new_genesis_block() -> Block {
+pub fn new_genesis_block() -> Block {
     Block::new("Genesis block".as_bytes().to_vec(), vec![])
 }
 
