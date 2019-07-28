@@ -2,7 +2,7 @@
 extern crate failure;
 
 mod libs;
-use libs::send_sync::test;
+use libs::block_chain::test;
 
 fn main() {
     test();
