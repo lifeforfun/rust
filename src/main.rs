@@ -2,7 +2,7 @@
 extern crate failure;
 
 mod libs;
-use libs::json_parser::test;
+use libs::send_sync::test;
 
 fn main() {
     test();

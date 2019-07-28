@@ -3,17 +3,17 @@ use std::convert::TryFrom;
 use std::str::Chars;
 use std::str::FromStr;
 
-type F64 = f64;
-type I64 = i64;
+pub type F64 = f64;
+pub type I64 = i64;
 
-#[derive(Debug, PartialEq, PartialOrd)]
-enum Number {
+#[derive(Debug, PartialEq, PartialOrd, Clone)]
+pub enum Number {
     I64(I64),
     F64(F64),
 }
 
-#[derive(Debug)]
-enum Value {
+#[derive(Debug, Clone)]
+pub enum Value {
     Null,
     Bool(bool),
     Number(Number),
@@ -358,7 +358,7 @@ impl<'a> ParserIter<'a> {
     }
 }
 
-pub fn test() {
+pub fn test() -> Result<Value, String> {
     let data = r#"
          {
 	"status": {
@@ -484,6 +484,6 @@ pub fn test() {
     {
         let mut chars = data.chars();
         let mut pit = ParserIter::new(&mut chars);
-        println!("{:?}", pit.parse());
+        pit.parse()
     }
 }
