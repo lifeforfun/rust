@@ -51,7 +51,7 @@ impl Blockchain {
     }
 
     fn add_block(&mut self, data: Vec<u8>) -> &mut Self {
-        let prev_block =  &self.blocks[self.blocks.len()-1];
+        let prev_block =  &self.blocks.last().unwrap();
         let new_block = Block::new(data, prev_block.hash.clone());
         self.blocks.push( new_block);
         self
