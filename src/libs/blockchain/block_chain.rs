@@ -5,10 +5,10 @@ use crypto::sha3::Sha3;
 use std::time::SystemTime;
 
 pub struct Block {
-    timestamp: u32,
-    data: Vec<u8>,
-    prev_block_hash: Vec<u8>,
-    hash: Vec<u8>,
+    pub timestamp: u32,
+    pub data: Vec<u8>,
+    pub prev_block_hash: Vec<u8>,
+    pub hash: Vec<u8>,
 }
 
 impl Block {
@@ -40,7 +40,7 @@ impl Block {
 }
 
 pub struct Blockchain {
-    blocks: Vec<Block>,
+    pub blocks: Vec<Block>,
 }
 
 impl Blockchain {
