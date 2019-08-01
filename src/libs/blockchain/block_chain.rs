@@ -3,6 +3,8 @@ extern crate crypto;
 use crypto::digest::Digest;
 use crypto::sha3::Sha3;
 use std::time::SystemTime;
+use crate::libs::blockchain::proof_of_work::ProofOfWork;
+use std::rc::Rc;
 
 pub struct Block {
     pub timestamp: u32,
@@ -13,17 +15,21 @@ pub struct Block {
 
 impl Block {
 
-    fn new(data: Vec<u8>, prev_block_hash: Vec<u8>) -> Block {
-        let mut block = Block{
+    pub fn new(data: Vec<u8>, prev_block_hash: Vec<u8>) -> Block {
+        let block = Rc::new(Block{
             timestamp: SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() as u32,
             data,
             prev_block_hash,
             hash: vec![]
-        };
+        });
 
-        block.set_hash();
+        let mut pow = ProofOfWork::new(Rc::clone(&block));
+        pow.run();
 
-        block
+        match Rc::try_unwrap(block) {
+            Ok(b) => b,
+            Err(_) => panic!("unwrap block error"),
+        }
     }
 
     fn set_hash(&mut self) {
@@ -44,13 +50,13 @@ pub struct Blockchain {
 }
 
 impl Blockchain {
-    fn new() -> Blockchain {
+    pub fn new() -> Blockchain {
         Blockchain{
             blocks:vec![new_genesis_block()]
         }
     }
 
-    fn add_block(&mut self, data: Vec<u8>) -> &mut Self {
+    pub fn add_block(&mut self, data: Vec<u8>) -> &mut Self {
         let prev_block =  &self.blocks.last().unwrap();
         let new_block = Block::new(data, prev_block.hash.clone());
         self.blocks.push( new_block);
