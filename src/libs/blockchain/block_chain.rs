@@ -6,6 +6,7 @@ use std::time::SystemTime;
 use crate::libs::blockchain::proof_of_work::ProofOfWork;
 use std::rc::Rc;
 
+#[derive(Debug)]
 pub struct Block {
     pub timestamp: u32,
     pub data: Vec<u8>,
@@ -28,7 +29,9 @@ impl Block {
 
         match Rc::try_unwrap(block) {
             Ok(b) => b,
-            Err(_) => panic!("unwrap block error"),
+            Err(_) => {
+                panic!("unwrap block failed");
+            },
         }
     }
 
@@ -45,6 +48,7 @@ impl Block {
     }
 }
 
+#[derive(Debug)]
 pub struct Blockchain {
     pub blocks: Vec<Block>,
 }

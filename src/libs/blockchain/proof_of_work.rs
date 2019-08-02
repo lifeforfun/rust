@@ -4,10 +4,11 @@ use crate::libs::blockchain::block_chain::*;
 use crypto::digest::Digest;
 use crypto::sha3::Sha3;
 use std::rc::Rc;
-use rug::Integer;
+use rug::{Integer, Assign};
 
 pub const TARGET_BIT: u32 = 20;
 
+#[derive(Debug)]
 pub struct ProofOfWork {
     pub block: Rc<Block>,
     pub target: Integer,
@@ -29,7 +30,8 @@ fn copy_from_slice(s: Vec<u8>) -> [u8; 8]
 
 impl ProofOfWork {
     pub fn new(b: Rc<Block>) -> Self {
-        let target = Integer::with_capacity(256);
+        let mut target = Integer::with_capacity(256);
+        target.assign(1);
         ProofOfWork{
             block: b,
             target: target << (256-TARGET_BIT),
