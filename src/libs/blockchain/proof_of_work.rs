@@ -48,11 +48,14 @@ impl ProofOfWork {
         v
     }
 
+    /// 挖矿就是找到hash值前TARGET_BIT位是0的字符串
+    /// 比如前5位是0，下面这种(16进制)就是符合要求的矿
+    /// 000000b33185e927c9a989cc7d5aaaed739c56dad9fd9361dea558b9bfaf5fbe
     pub fn run(&mut self) -> (u64, Vec<u8>) {
         let mut hash_int;
         let mut hash = vec![0u8];
         let mut nonce = 0;
-        println!("Mining the block containing \"{:?}\"", self.block.data);
+        println!("Mining the block containing \"{}\"", self);
 
         loop {
             if nonce>=u64::max_value() {

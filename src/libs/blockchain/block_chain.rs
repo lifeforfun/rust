@@ -5,6 +5,7 @@ use crypto::sha3::Sha3;
 use std::time::SystemTime;
 use crate::libs::blockchain::proof_of_work::ProofOfWork;
 use std::rc::Rc;
+use std::fmt;
 
 #[derive(Debug)]
 pub struct Block {
@@ -12,6 +13,13 @@ pub struct Block {
     pub data: Vec<u8>,
     pub prev_block_hash: Vec<u8>,
     pub hash: Vec<u8>,
+}
+
+impl fmt::Display for Block {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = self.data.iter().collect::<String>();
+        write!(f, "{}", s)
+    }
 }
 
 impl Block {
@@ -24,8 +32,11 @@ impl Block {
             hash: vec![]
         });
 
-        let mut pow = ProofOfWork::new(Rc::clone(&block));
-        pow.run();
+        {
+            // Rc::clone 会增加strong count
+            let mut pow = ProofOfWork::new(Rc::clone(&block));
+            pow.run();
+        }
 
         match Rc::try_unwrap(block) {
             Ok(b) => b,
