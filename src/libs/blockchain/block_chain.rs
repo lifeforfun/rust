@@ -17,7 +17,7 @@ pub struct Block {
 
 impl fmt::Display for Block {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s = self.data.iter().collect::<String>();
+        let s = std::str::from_utf8(&self.data[..]).unwrap();
         write!(f, "{}", s)
     }
 }

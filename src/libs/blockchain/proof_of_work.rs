@@ -55,7 +55,7 @@ impl ProofOfWork {
         let mut hash_int;
         let mut hash = vec![0u8];
         let mut nonce = 0;
-        println!("Mining the block containing \"{}\"", self);
+        println!("Mining the block containing \"{}\"", self.block);
 
         loop {
             if nonce>=u64::max_value() {
