@@ -1,7 +1,5 @@
 extern crate crypto;
 
-use crypto::digest::Digest;
-use crypto::sha3::Sha3;
 use std::time::SystemTime;
 use crate::libs::blockchain::proof_of_work::ProofOfWork;
 use std::rc::Rc;
@@ -13,6 +11,7 @@ pub struct Block {
     pub data: Vec<u8>,
     pub prev_block_hash: Vec<u8>,
     pub hash: Vec<u8>,
+    pub nonce: u64,
 }
 
 impl fmt::Display for Block {
@@ -20,7 +19,7 @@ impl fmt::Display for Block {
         let s = std::str::from_utf8(&self.data[..]).unwrap();
         write!(f, "{}", s)
     }
-}
+}Hash
 
 impl Block {
 
@@ -29,34 +28,29 @@ impl Block {
             timestamp: SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() as u32,
             data,
             prev_block_hash,
-            hash: vec![]
+            hash: vec![],
+            nonce: 0,
         });
+        let tuple;
 
         {
-            // Rc::clone 会增加strong count
+            // Rc::clone 会增加strong count，在try_unwrap时需要保证strong count==1，所以要手动管理作用域
             let mut pow = ProofOfWork::new(Rc::clone(&block));
-            pow.run();
+            tuple = pow.run();
         }
 
         match Rc::try_unwrap(block) {
-            Ok(b) => b,
+            Ok(mut b) => {
+                b.nonce = tuple.0;
+                b.hash  = tuple.1[..].to_vec();
+                b
+            },
             Err(_) => {
                 panic!("unwrap block failed");
             },
         }
     }
 
-    fn set_hash(&mut self) {
-        let mut hasher = Sha3::sha3_256();
-        let mut v = vec![];
-        v.append(&mut self.prev_block_hash.clone());
-        v.append(&mut self.data.clone());
-        v.append(&mut self.timestamp.to_string().as_bytes().to_vec().clone());
-        hasher.input_str(
-            std::str::from_utf8(&v[..]).unwrap()
-        );
-        self.hash = hasher.result_str().into_bytes();
-    }
 }
 
 #[derive(Debug)]
