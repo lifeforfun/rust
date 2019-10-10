@@ -4,7 +4,6 @@
 pub mod client;
 pub mod extrema;
 pub mod fibonacci;
-pub mod ggez;
 pub mod iterator;
 pub mod json_parser;
 pub mod leetcode;
@@ -18,3 +17,4 @@ pub mod testtokio;
 pub mod tree;
 pub mod send_sync;
 pub mod blockchain;
+pub mod azul;

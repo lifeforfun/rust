@@ -19,7 +19,7 @@ impl fmt::Display for Block {
         let s = std::str::from_utf8(&self.data[..]).unwrap();
         write!(f, "{}", s)
     }
-}Hash
+}
 
 impl Block {
 

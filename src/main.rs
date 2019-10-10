@@ -2,7 +2,7 @@
 extern crate failure;
 
 mod libs;
-use libs::blockchain::test;
+use libs::azul::test;
 
 fn main() {
     test();
