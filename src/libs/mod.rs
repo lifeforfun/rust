@@ -18,3 +18,4 @@ pub mod tree;
 pub mod send_sync;
 pub mod blockchain;
 pub mod azul;
+pub mod hero_story;

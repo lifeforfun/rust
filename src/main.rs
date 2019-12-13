@@ -2,7 +2,7 @@
 extern crate failure;
 
 mod libs;
-use libs::azul::test;
+use libs::hero_story::hero::test;
 
 fn main() {
     test();
