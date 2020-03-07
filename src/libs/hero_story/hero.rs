@@ -46,9 +46,9 @@ pub fn test()
     let x = Vec3::new(1.0, 2.0, 3.0);
     let y = Vec3::new(4.0, 5.0, 6.0);
 
-    /// Note that, for convenience, it is also valid to create a vector of
-    /// references to structs, like this:
-    /// `let path = builder.create_vector(&[&x, &y]);`
+    // Note that, for convenience, it is also valid to create a vector of
+    // references to structs, like this:
+    // `let path = builder.create_vector(&[&x, &y]);`
     let path = builder.create_vector(&[x, y]);
 
     // Create the monster using the `Monster::create` helper function. This
@@ -73,10 +73,10 @@ pub fn test()
     // This must be called after `finish()`.
     // `finished_data` returns a byte slice.
     let buf = builder.finished_data();// Of type `&[u8]`
-    /// Now you can write the bytes to a file, send them over the network.. **Make sure your file mode (or transfer protocol) is set to BINARY, not text.`** If you transfer a FlatBuffer in text mode, the buffer will be corrupted, which will lead to hard to find problems when you read the buffer.
+    // Now you can write the bytes to a file, send them over the network.. **Make sure your file mode (or transfer protocol) is set to BINARY, not text.`** If you transfer a FlatBuffer in text mode, the buffer will be corrupted, which will lead to hard to find problems when you read the buffer.
 
 
-    /// Reading Orc FlatBuffers
+    // Reading Orc FlatBuffers
     // Get an accessor to the root object inside the buffer.
     let monster = get_root_as_monster(buf);
 

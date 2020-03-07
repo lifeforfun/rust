@@ -1,8 +1,10 @@
-#[macro_use]
-extern crate failure;
+#![allow(unused)]
+//#[macro_use]
+//extern crate failure;
 
-mod libs;
-use libs::hero_story::hero::test;
+pub mod libs;
+//use libs::executor::test;
+use libs::ffi::snappy::test;
 
 fn main() {
     test();
