@@ -9,6 +9,10 @@ links = "vulkan"
 name = "rust"
 path = "src/main.rs"
 
+[[bin]]
+name = "catsay"
+path = "src/catsay.rs"
+
 [dependencies]
 #tokio=""
 #futures=""
@@ -27,3 +31,5 @@ exitfailure = "0.5.1"
 #crossbeam = "0.7.3"
 structopt = "0.3.14"
 colored = "1.9.3"
+assert_cmd = "1.0.1"
+predicates = "1.0.4"
