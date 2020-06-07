@@ -13,6 +13,10 @@ path = "src/main.rs"
 name = "catsay"
 path = "src/catsay.rs"
 
+[[bin]]
+name = "catsay-gui"
+path = "src/catsay-gui.rs"
+
 [dependencies]
 #tokio=""
 #futures=""
@@ -33,3 +37,4 @@ structopt = "0.3.14"
 colored = "1.9.3"
 assert_cmd = "1.0.1"
 predicates = "1.0.4"
+cursive = "0.11.2"
