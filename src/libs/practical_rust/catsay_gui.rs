@@ -118,7 +118,48 @@ fn gui()
     app.run(&env::args().collect::<Vec<_>>());
 }
 
+fn gui_glade()
+{
+    let application = gtk::Application::new(
+        "com.shinglyu.catsay-gui-glade",
+        Default::default()
+    ).expect("Failed to initialize GTK");
+    application.connect_activate(|app|{
+        let glade_src = include_str!("layout.glade");
+        let builder = gtk::Builder::new_from_string(glade_src);
+        let window:gtk::Window = builder
+            .get_object("applicationwindow1").unwrap();
+        window.set_application(app);
+
+        let message_input: gtk::Entry = builder
+            .get_object("message_input").unwrap();
+        let button:gtk::Button = builder
+            .get_object("generate_btn").unwrap();
+        let message_output:gtk::Label = builder
+            .get_object("message_output").unwrap();
+        let image_output:gtk::Image = builder
+            .get_object("image_output").unwrap();
+        let image_output_clone = image_output.clone();
+
+        button.connect_clicked(move|_|{
+            message_output.set_text(&format!(
+                "{}
+                \\
+                 \\
+                ",
+                message_input.get_text().unwrap().as_str()
+            ));
+            image_output_clone.show();
+        });
+
+        window.show_all();
+        image_output.hide();
+    });
+    application.run(&env::args().collect::<Vec<_>>());
+}
+
 pub fn test() {
 //    tui();
-    gui();
+//     gui();
+    gui_glade();
 }
