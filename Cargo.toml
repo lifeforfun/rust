@@ -38,3 +38,8 @@ colored = "1.9.3"
 assert_cmd = "1.0.1"
 predicates = "1.0.4"
 cursive = "0.11.2"
+gio = "0.6.0"
+
+[dependencies.gtk]
+version = "0.6.0" # the gtk crate version
+features = ["v3_22"] # system gtk version

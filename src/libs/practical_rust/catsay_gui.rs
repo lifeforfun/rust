@@ -1,9 +1,15 @@
 extern crate cursive;
+extern crate gio;
+extern crate gtk;
 
 use cursive::event::Key;
 use cursive::traits::Identifiable;
 use cursive::views::{Checkbox, Dialog, EditView, ListView, TextView};
 use cursive::Cursive; // for .with_id() and .call_on_id()
+use gio::prelude::*;
+use gtk::prelude::*;
+use gtk::{Application, ApplicationWindow, Box, Image, Label, Orientation};
+use std::env;
 
 // wrap all form fields value in one struct so we can pass around easily
 struct CatsayOptions<'a> {
@@ -76,6 +82,43 @@ fn tui() {
     siv.run();
 }
 
+fn gui()
+{
+    let app = Application::new(
+        "com.shinglyu.catsay-gui",
+        gio::ApplicationFlags::empty()
+    ).expect("Failed to initialize GTK.");
+
+    app.connect_startup(|app|{
+        let window = ApplicationWindow::new(app);
+        window.set_title("Catsay");
+        window.set_default_size(350, 70);
+
+        let layout_box = Box::new(Orientation::Vertical, 0);
+        let label = Label::new("Meow!
+
+            \\
+             \\
+        ");
+        layout_box.add(&label);
+        let cat_image = Image::new_from_file("./meow.jpeg");
+        layout_box.add(&cat_image);
+
+        window.add(&layout_box);
+
+        window.connect_delete_event(|win,_|{
+            win.destroy();
+            // Don't prevent default behavior (i.e. close)
+            Inhibit(false)
+        });
+        window.show_all();
+    });
+
+    app.connect_activate(|_|{});
+    app.run(&env::args().collect::<Vec<_>>());
+}
+
 pub fn test() {
-    tui();
+//    tui();
+    gui();
 }
